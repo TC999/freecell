@@ -1,46 +1,73 @@
 // FreeCellGame.cpp
-// 由伪代码 _0FreeCellGame_QEAA_XZ.c 转换而来，初步整理为 C++ 类实现
+// FreeCell game implementation
 #include "FreeCellGame.h"
+#include "types.h"
 #include <windows.h>
-#include <cstdint>
 #include <cstring>
 
-// CardStack 伪还原
+// External global for media center mode
+extern bool g_bMediaCenter;
+
+// CardStack stub class implementation
 class CardStack {
 public:
-    CardStack() {
-        // 伪构造，成员变量需根据反编译内容补充
-        // ...
+    CardStack() : m_cards(nullptr), m_count(0), m_capacity(16) {}
+    ~CardStack() {
+        delete[] m_cards;
     }
-    // ... 其他成员函数和成员变量
+    
+    Card** m_cards;
+    unsigned int m_count;
+    unsigned int m_capacity;
 };
 
-// CardTable 伪还原
+// CardTable stub class implementation
 class CardTable {
 public:
-    CardTable() {
-        // 伪构造，成员变量需根据反编译内容补充
-        // ...
-    }
-    // ... 其他成员函数和成员变量
+    CardTable() {}
+    void Reset() {}
 };
 
-// 假设外部变量和类型声明
-extern bool g_bMediaCenter;
-extern const wchar_t* g_SETTINGS_SAVE_FILENAME;
+// Card stub class implementation  
+class Card {
+public:
+    Card() : m_id(0), m_faceUp(false) {}
+    unsigned int m_id;
+    bool m_faceUp;
+};
+
+// ScoredMove struct
+struct ScoredMove {
+    Card* card;
+    CardStack* fromStack;
+    CardStack* toStack;
+    int score;
+};
 
 FreeCellGame::FreeCellGame()
+    : m_state(0)
+    , m_prevState(0)
+    , m_cardTable(nullptr)
+    , m_rootNode(nullptr)
+    , m_selectedCard(nullptr)
+    , m_rightClickCard(nullptr)
+    , m_selectedStack(nullptr)
+    , m_gameNumber(0)
+    , m_moveCount(0)
+    , m_someField40(6085)
+    , m_tickCount(0)
+    , m_animationEnabled(true)
+    , m_soundEnabled(true)
+    , m_gameInProgress(false)
+    , m_gameWon(false)
+    , m_gameLost(false)
+    , m_hintsEnabled(true)
+    , m_hintsPending(false)
+    , m_undoEnabled(true)
 {
-    // 构造函数成员初始化，具体成员变量需根据实际结构体定义
-    std::memset(this, 0, sizeof(FreeCellGame));
-    // 伪代码中的虚表指针和接口初始化略过，实际 C++ 由继承实现
-    // ...
-    // 伪代码中的成员初始化
-    // 这里只做演示，实际应按 FreeCellGame.h 的成员变量来初始化
-    // ...
-    // 伪代码中的特殊成员
-    this->someField40 = 6085;
-    this->tickCount = GetTickCount64();
+    m_tickCount = GetTickCount64();
+    
+    // Set settings filename based on mode
     if (g_bMediaCenter) {
         g_SETTINGS_SAVE_FILENAME = L"FreeCellSettingsMCE.xml";
     } else {
@@ -48,49 +75,308 @@ FreeCellGame::FreeCellGame()
     }
 }
 
-void FreeCellGame::FinishGame()
-{
-    // 伪代码逻辑：重置牌桌、重新发牌、整理堆栈、刷新UI
-    // 这里只写伪实现，具体细节需结合 CardTable/CardStack 结构
-    if (cardTable) {
-        // cardTable->Reset();
+bool FreeCellGame::Init() {
+    // Initialize game resources
+    m_cardTable = new CardTable();
+    return m_cardTable != nullptr;
+}
+
+void FreeCellGame::Cleanup() {
+    delete m_cardTable;
+    m_cardTable = nullptr;
+}
+
+void FreeCellGame::NewGame() {
+    // Reset game state
+    m_gameInProgress = false;
+    m_gameWon = false;
+    m_gameLost = false;
+    m_moveCount = 0;
+    
+    // Clear selection
+    m_selectedCard = nullptr;
+    m_rightClickCard = nullptr;
+    m_selectedStack = nullptr;
+    
+    // Start new game
+    m_gameInProgress = true;
+}
+
+void FreeCellGame::FinishGame() {
+    if (m_cardTable) {
+        m_cardTable->Reset();
     }
-    // 重新发牌、整理堆栈等...
-    // UpdateUI(0);
+    m_gameInProgress = false;
+    UpdateUI(true);
 }
 
-void FreeCellGame::doFakeClick(CardStack* stack)
-{
-    // 伪实现，具体逻辑需结合 CardStack 结构
-    // RequestSkipAnimation();
-    // ...
+void FreeCellGame::Undo() {
+    if (!m_undoEnabled || m_moveCount == 0) {
+        return;
+    }
+    // Undo logic would go here
+    m_moveCount--;
+    UpdateUI(true);
 }
 
-bool FreeCellGame::GameDataExists()
-{
-    // 伪实现，实际应检测存档文件是否存在
-    // return std::filesystem::exists("FreeCell.FreeCellSave-ms");
+void FreeCellGame::doFakeClick(CardStack* stack) {
+    // Simulate clicking on a stack
+    RequestSkipAnimation();
+}
+
+bool FreeCellGame::GameDataExists() {
+    // Check if save file exists
+    // Simplified implementation
     return false;
 }
 
-void FreeCellGame::CreateHints(bool force)
-{
-    // 伪实现，实际应生成提示
-    // invalidateHints();
-    // FreeCellMove::CreateMoves(...);
+bool FreeCellGame::LoadGameData() {
+    return false;
 }
 
-int FreeCellGame::GetCardIdFromFreeCellId(int a1)
-{
-    int v1 = a1 / 4;
-    int v2 = a1 % 4;
-    int v3 = 2;
-    if (v2 != 3) {
-        if (v2 == 2)
-            v2 = 3;
-        v3 = v2;
+bool FreeCellGame::SaveGameData() {
+    return false;
+}
+
+bool FreeCellGame::RemoveGameData() {
+    return false;
+}
+
+bool FreeCellGame::LoadGeneralData() {
+    return false;
+}
+
+bool FreeCellGame::SaveGeneralData() {
+    return false;
+}
+
+void FreeCellGame::CreateHints(bool force) {
+    if (!force && !m_hintsEnabled) {
+        return;
     }
-    if (!v1)
-        v1 = 13;
-    return 13 * v3 + v1 - 1;
+    invalidateHints();
+    getHintMovesInPriorityOrder(m_scoredMoves);
+}
+
+void FreeCellGame::PlayHint(Card* card1, Card* card2, CardStack* stack) {
+    // Show hint animation
+}
+
+void FreeCellGame::PlayHint(bool unused) {
+    // Play hint
+}
+
+void FreeCellGame::ShowHint(bool show, bool unused) {
+    // Show or hide hint
+}
+
+bool FreeCellGame::Update(float deltaTime) {
+    // Update game state
+    return m_gameInProgress;
+}
+
+void FreeCellGame::UpdateUI(bool force) {
+    // Update UI elements
+}
+
+void FreeCellGame::UpdateAccessibility() {
+    // Update accessibility info
+}
+
+void FreeCellGame::UpdateMenuState() {
+    // Update menu enable/disable states
+}
+
+bool FreeCellGame::OnCanDragCardCheck(Card* card) {
+    return card != nullptr && m_gameInProgress;
+}
+
+void FreeCellGame::OnCardClicked(Card* card) {
+    if (!card || !m_gameInProgress) {
+        return;
+    }
+    m_selectedCard = card;
+}
+
+bool FreeCellGame::OnCardDoubleClick(Card* card) {
+    if (!card || !m_gameInProgress) {
+        return false;
+    }
+    // Auto-move to foundation if possible
+    return true;
+}
+
+void FreeCellGame::OnCardDragStarted(Card* card) {
+    m_selectedCard = card;
+}
+
+void FreeCellGame::OnCardDragEnded(Card* card) {
+    m_selectedCard = nullptr;
+}
+
+void FreeCellGame::OnCardStackClicked(CardStack* stack) {
+    m_selectedStack = stack;
+}
+
+int FreeCellGame::OnGameLost() {
+    m_gameLost = true;
+    m_gameInProgress = false;
+    RecordCurrentGameAsLoss();
+    return 0;
+}
+
+int FreeCellGame::OnGameWon() {
+    m_gameWon = true;
+    m_gameInProgress = false;
+    return 0;
+}
+
+int FreeCellGame::OnMoveComplete() {
+    m_moveCount++;
+    UpdateUI(false);
+    return 0;
+}
+
+void FreeCellGame::OnGameStart() {
+    m_gameInProgress = true;
+    m_tickCount = GetTickCount64();
+}
+
+bool FreeCellGame::OnGameClose() {
+    if (m_gameInProgress) {
+        SaveGameData();
+    }
+    return true;
+}
+
+void FreeCellGame::OnEnterState(int state) {
+    m_prevState = m_state;
+    m_state = state;
+}
+
+int FreeCellGame::OnRunState(int state) {
+    return state;
+}
+
+void FreeCellGame::HandleEvent(Event* event) {
+    // Handle game events
+}
+
+void FreeCellGame::OnCardAnimationComplete(CardAnimation* anim) {
+    // Animation completed callback
+}
+
+void FreeCellGame::SetAnimationEnabled(bool enabled) {
+    m_animationEnabled = enabled;
+}
+
+void FreeCellGame::SetSoundEnabled(bool enabled) {
+    m_soundEnabled = enabled;
+}
+
+void FreeCellGame::SetCurrentDeckSkin(int skinId) {
+    // Set deck skin
+}
+
+void FreeCellGame::SetCurrentBackground(int bgId) {
+    // Set background
+}
+
+void FreeCellGame::SetSelectedCard(Card* card, bool param1, bool param2, bool param3) {
+    m_selectedCard = card;
+}
+
+void FreeCellGame::SetRightClickCard(Card* card) {
+    m_rightClickCard = card;
+}
+
+void FreeCellGame::SetRandomGameNumber() {
+    // Generate random game number
+    m_gameNumber = (unsigned int)GetTickCount64() % 1000000 + 1;
+}
+
+void FreeCellGame::PlaySoundW(int soundId, bool loop, unsigned int* pHandle) {
+    if (!m_soundEnabled) {
+        return;
+    }
+    // Play sound effect
+}
+
+void FreeCellGame::CacheSounds() {
+    // Preload sound effects
+}
+
+void FreeCellGame::ChooseNewRandomAppearance() {
+    // Randomly select deck and background
+}
+
+void FreeCellGame::SpecialDealCards(int gameNumber) {
+    m_gameNumber = gameNumber;
+    // Deal cards for specific game number
+}
+
+void FreeCellGame::InitialDeal(_Array<unsigned int>& cards) {
+    // Initial card deal
+}
+
+void FreeCellGame::RequestSkipAnimation() {
+    // Skip current animation
+}
+
+void FreeCellGame::SaveGameExplorerStatistics() {
+    // Save statistics to Windows Game Explorer
+}
+
+int FreeCellGame::GetCardIdFromFreeCellId(int freeCellId) {
+    // Convert FreeCell-specific card ID to standard ID
+    int rank = freeCellId / 4;
+    int suit = freeCellId % 4;
+    
+    // Adjust suit mapping
+    int adjustedSuit = 2;
+    if (suit != 3) {
+        adjustedSuit = (suit == 2) ? 3 : suit;
+    }
+    
+    // Adjust rank (Ace is 13 in FreeCell format)
+    if (!rank) {
+        rank = 13;
+    }
+    
+    return 13 * adjustedSuit + rank - 1;
+}
+
+bool FreeCellGame::UpdateCardAccessName(Card* card) {
+    // Update accessibility name for card
+    return true;
+}
+
+bool FreeCellGame::IsGameLost() {
+    // Check if no more moves are available
+    return false;
+}
+
+unsigned int FreeCellGame::CheckForSuitCompletions(bool& found1, bool& found2) {
+    found1 = false;
+    found2 = false;
+    return 0;
+}
+
+unsigned int FreeCellGame::checkForSuitCompletionsInStacks(_Array<CardStack*>& stacks, bool& found1, bool& found2) {
+    found1 = false;
+    found2 = false;
+    return 0;
+}
+
+void FreeCellGame::getHintMovesInPriorityOrder(_Array<ScoredMove>& moves) {
+    // Generate and sort possible moves by score
+}
+
+void FreeCellGame::invalidateHints() {
+    m_hintsPending = false;
+    m_scoredMoves.m_count = 0;
+}
+
+void FreeCellGame::RecordCurrentGameAsLoss() {
+    // Update statistics
 }
