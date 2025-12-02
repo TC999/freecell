@@ -1,0 +1,60 @@
+CardStack *__fastcall CardStack::CardStack(CardStack *this)
+{
+  CardStack *result; // rax
+
+  *(_QWORD *)this = &CardStack::`vftable'{for `SerializableData'};
+  *((_QWORD *)this + 1) = &CardStack::`vftable'{for `IEventListener'};
+  *((_QWORD *)this + 9) = 0;
+  *((_QWORD *)this + 10) = 0;
+  *((_QWORD *)this + 11) = 0;
+  *((_QWORD *)this + 12) = 0;
+  *((_QWORD *)this + 13) = 0;
+  *((_QWORD *)this + 14) = 0;
+  *((_QWORD *)this + 15) = 0;
+  *((_QWORD *)this + 16) = 0;
+  *((_QWORD *)this + 17) = 0;
+  *((_QWORD *)this + 34) = 0;
+  *((_QWORD *)this + 35) = 0;
+  *((_QWORD *)this + 36) = 0;
+  *((_DWORD *)this + 76) = 0;
+  *((_DWORD *)this + 77) = 0;
+  *((_DWORD *)this + 78) = 16;
+  *((_QWORD *)this + 40) = 0;
+  *((_DWORD *)this + 11) = 1;
+  *((_DWORD *)this + 82) = 1;
+  *((_DWORD *)this + 5) = 0;
+  result = this;
+  *((_DWORD *)this + 6) = 0;
+  *((_DWORD *)this + 7) = 0;
+  *((_DWORD *)this + 8) = 0;
+  *((_DWORD *)this + 9) = 0;
+  *((_DWORD *)this + 10) = 0;
+  *((_DWORD *)this + 12) = 0;
+  *((_DWORD *)this + 13) = 0;
+  *((_DWORD *)this + 65) = 0;
+  *((_QWORD *)this + 18) = 0;
+  *((_QWORD *)this + 21) = 0;
+  *((_QWORD *)this + 22) = 0;
+  *((_QWORD *)this + 23) = 0;
+  *((_QWORD *)this + 24) = 0;
+  *((_QWORD *)this + 25) = 0;
+  *((_QWORD *)this + 26) = 0;
+  *((_QWORD *)this + 28) = 0;
+  *((_QWORD *)this + 29) = 0;
+  *((_QWORD *)this + 19) = 0;
+  *((_QWORD *)this + 20) = 0;
+  *((_DWORD *)this + 60) = 0;
+  *((_DWORD *)this + 61) = 0;
+  *((_DWORD *)this + 62) = 0;
+  *((_DWORD *)this + 63) = 0;
+  *((_DWORD *)this + 64) = 0;
+  *((_DWORD *)this + 66) = 0;
+  *((_QWORD *)this + 8) = 0;
+  *((_QWORD *)this + 37) = 0;
+  *((_DWORD *)this + 83) = 0;
+  *((_QWORD *)this + 27) = 0;
+  *((_BYTE *)this + 56) = 0;
+  *((_BYTE *)this + 57) = 0;
+  *((_BYTE *)this + 16) = 0;
+  return result;
+}
