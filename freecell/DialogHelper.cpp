@@ -4,6 +4,9 @@
 #include "types.h"
 #include <cstring>
 
+// Constants for dialog template allocation
+static const unsigned int DIALOG_TEMPLATE_ALLOC_SIZE = 3000;  // Size in bytes for writable dialog template
+
 bool DialogHelper::Init(HINSTANCE hInstance, HWND hWnd, bool bMediaCenter, bool unused) {
     if (!hInstance) {
         return false;
@@ -27,9 +30,9 @@ bool DialogHelper::Init(HINSTANCE hInstance, HWND hWnd, bool bMediaCenter, bool 
         
         DWORD defaultLayout = 0;
         GetProcessDefaultLayout(&defaultLayout);
-        m_DlgTemplateAlloc = 3000;
+        m_DlgTemplateAlloc = DIALOG_TEMPLATE_ALLOC_SIZE;
         m_bRTL = (defaultLayout & 1) != 0;
-        m_hWritableTemplate = GlobalAlloc(GMEM_FIXED | GMEM_ZEROINIT, 0xBB8);
+        m_hWritableTemplate = GlobalAlloc(GMEM_FIXED | GMEM_ZEROINIT, DIALOG_TEMPLATE_ALLOC_SIZE);
         m_hLastFocus = nullptr;
     }
     
@@ -105,9 +108,16 @@ int DialogHelper::ShowMessageBox(unsigned int captionId, unsigned int textId, un
     wchar_t captionBuf[256] = {0};
     wchar_t textBuf[512] = {0};
     
-    if (m_TaskDialog && useTaskDialog && (char)(reinterpret_cast<uintptr_t>(useTaskDialog) & 0xFF)) {
-        const unsigned short* pText = text ? (const unsigned short*)text : reinterpret_cast<const unsigned short*>(static_cast<uintptr_t>(textId));
-        unsigned short* pCaption = caption ? (unsigned short*)(const_cast<wchar_t*>(caption)) : reinterpret_cast<unsigned short*>(static_cast<uintptr_t>(captionId));
+    // Check if TaskDialog is available and enabled
+    // useTaskDialog is treated as a boolean flag (non-null and first byte non-zero)
+    bool useTask = useTaskDialog && (reinterpret_cast<uintptr_t>(useTaskDialog) & 0x1);
+    
+    if (m_TaskDialog && useTask) {
+        // For TaskDialog API, resource IDs can be passed as low-order word of pointer
+        const unsigned short* pText = text ? (const unsigned short*)text 
+            : reinterpret_cast<const unsigned short*>(static_cast<uintptr_t>(textId));
+        unsigned short* pCaption = caption ? (unsigned short*)(const_cast<wchar_t*>(caption)) 
+            : reinterpret_cast<unsigned short*>(static_cast<uintptr_t>(captionId));
         m_TaskDialog(m_hWnd, m_hInstance, pCaption, pText, nullptr, 1, iconType, &result);
     } else {
         if (!caption && !LoadStringW(m_hInstance, (UINT)captionId, captionBuf, 256)) {

@@ -27,12 +27,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     {
         DWORD enabled = 1;
         // Check Windows licensing for game
-        // Note: SLGetWindowsInformationDWORD may not be available on all systems
+        // SLGetWindowsInformationDWORD may not be available on all systems
+        // This is a Windows Software Licensing API function
+        typedef HRESULT (WINAPI *SLGetWindowsInfoDWORD_t)(PCWSTR, DWORD*);
         HMODULE hSlc = LoadLibraryW(L"slc.dll");
         if (hSlc) {
-            typedef HRESULT (WINAPI *SLGWID)(PCWSTR, DWORD*);
-            SLGWID pfnSLGetWindowsInformationDWORD = 
-                (SLGWID)GetProcAddress(hSlc, "SLGetWindowsInformationDWORD");
+            SLGetWindowsInfoDWORD_t pfnSLGetWindowsInformationDWORD = 
+                (SLGetWindowsInfoDWORD_t)GetProcAddress(hSlc, "SLGetWindowsInformationDWORD");
             if (pfnSLGetWindowsInformationDWORD) {
                 pfnSLGetWindowsInformationDWORD(L"Shell-InBoxGames-FreeCell-EnableGame", &enabled);
             }

@@ -57,10 +57,13 @@ const wchar_t* EngineHandler::GetGDFPath() {
     return L"\\Microsoft Games\\FreeCell\\FreeCell.gdf.xml";
 }
 
+// String resource ID for window title
+static const UINT WINDOW_TITLE_RESOURCE_ID = 0x65;
+
 const wchar_t* EngineHandler::GetWindowTitle() {
     if (!s_wszTitle[0]) {
         HMODULE hMod = GetModuleHandleW(nullptr);
-        if (!LoadStringW(hMod, 0x65, s_wszTitle, 512)) {
+        if (!LoadStringW(hMod, WINDOW_TITLE_RESOURCE_ID, s_wszTitle, 512)) {
             wcsncpy_s(s_wszTitle, 512, GetProjectName(), _TRUNCATE);
         }
     }

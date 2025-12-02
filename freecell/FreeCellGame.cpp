@@ -44,6 +44,9 @@ struct ScoredMove {
     int score;
 };
 
+// FreeCell game constants
+static const unsigned int FREECELL_GAME_VERSION = 6085;  // Version/magic number from original binary
+
 FreeCellGame::FreeCellGame()
     : m_state(0)
     , m_prevState(0)
@@ -54,7 +57,7 @@ FreeCellGame::FreeCellGame()
     , m_selectedStack(nullptr)
     , m_gameNumber(0)
     , m_moveCount(0)
-    , m_someField40(6085)
+    , m_someField40(FREECELL_GAME_VERSION)
     , m_tickCount(0)
     , m_animationEnabled(true)
     , m_soundEnabled(true)

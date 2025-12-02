@@ -56,11 +56,11 @@ struct StackGroup;
 template<typename T>
 class _Array {
 public:
-    _Array() : m_data(nullptr), m_count(0), m_capacity(16) {}
+    static const unsigned int DEFAULT_CAPACITY = 16;
+    
+    _Array() : m_data(nullptr), m_count(0), m_capacity(DEFAULT_CAPACITY) {}
     ~_Array() {
-        if (m_data) {
-            delete[] m_data;
-        }
+        delete[] m_data;
     }
     
     unsigned int Add(const T& item) {
@@ -68,10 +68,12 @@ public:
             // Grow the array
             unsigned int newCapacity = m_capacity * 2;
             T* newData = new T[newCapacity];
-            for (unsigned int i = 0; i < m_count; i++) {
-                newData[i] = m_data[i];
+            if (m_data) {
+                for (unsigned int i = 0; i < m_count; i++) {
+                    newData[i] = m_data[i];
+                }
+                delete[] m_data;
             }
-            delete[] m_data;
             m_data = newData;
             m_capacity = newCapacity;
         }
