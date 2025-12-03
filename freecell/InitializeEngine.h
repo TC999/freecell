@@ -1,8 +1,9 @@
 // InitializeEngine.h
+// Engine initialization function declaration
 #pragma once
 
-struct IEngineInterface;
-struct IControllerInterface;
+#include "IEngineInterface.h"
 
-// 初始化引擎主流程，controller 可为 nullptr
+// Initialize the game engine
+// Returns true on success, false on failure
 bool InitializeEngine(IEngineInterface* engine, IControllerInterface* controller);
